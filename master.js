@@ -1,6 +1,3 @@
-
-let test = 'testing'
-
-console.log(test)
+console.log('Main Script.')
 
 

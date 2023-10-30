@@ -7,9 +7,7 @@
 <meta name="author" content="Neru">
 <meta name="description" content="MYRIAD Playground">
 <meta name="keywords" content="MYRIAD">    
-<title>  
-    READMYRIAD - Playground Project
-</title>
+<title>READMYRIAD - Playground Project</title>
 <style>
     body, main {
     padding: 0;
@@ -21,19 +19,57 @@
         min-height: 1500px;
     }
     canvas {
-        display: flex;
-        background-color: #00000050;
+        background-color: #000000;
         padding: 0;
+    }
+    * {
+        box-sizing: border-box;
     }
 </style>
 </head>
 
-<body>
-    <main id="content-main" class="main-content">
-        <section id="game">
-            <canvas>
-            </canvas>
-        </section>     
-    </main>
+<body style="display: flex; justify-content: center;">
+    <div id="game" style="position: relative; display: inline-block; ">
+        <div 
+        id="stat-bar" 
+        style="
+        position: absolute; 
+        width: 100%; 
+        height: 12%; 
+        display: flex;
+        align-items: center;
+        padding: 1%;
+        background-color: #00000080;">
+
+            <!-- HEALTHBAR 1 -->
+            <div style="position: relative; width: 100%; height: 50%; display: flex;">
+                <div 
+                style="background-color: rgb(128, 0, 0); width: 100%; height: 100%;"></div>
+                
+                <div
+                id="playerHealth"  
+                style="position: absolute; background-color: green; width: 100%; height: 100%; left: 0;"></div>
+            </div>
+
+            <!-- MIDDLE -->
+            <div id="timer" style="width: 13%; background-color: rgb(179, 179, 0); height: 100%;"></div>
+            
+            <!-- HEALTHBAR 2 -->
+            <div style="position: relative; width: 100%; height: 50%; display: flex;">
+                <div 
+                style="background-color: rgb(128, 0, 0); width: 100%; height: 100%;"></div>
+                
+                <div
+                id="enemyHealth" 
+                style="position: absolute; background-color: green; width: 100%; height: 100%; right: 0"></div>
+            </div>
+
+        </div>
+
+        <canvas>
+        </canvas>
+    </div>    
+<script src="js/functions.js"></script> 
+<script src="js/classes.js"></script>
 <script src="playground.js"></script>
 </body>
