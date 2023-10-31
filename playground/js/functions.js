@@ -42,8 +42,8 @@ function drawEnvironment(){
 
 // SPEED CONSTANTS
 const gravity = canvas.height * 0.0011
-const speed = canvas.width * 0.01
-const jump = -canvas.height * 0.027
+const speed = canvas.width * 0.012
+const jump = -canvas.height * 0.029
 
 // INPUT REGISTER
 addEventListener('keydown', ({key}) => {
@@ -230,12 +230,16 @@ function enemyAttack(){
     // ONE -> ATTACK
     if (enemy.input.attack && !enemy.attribute.isAttacking ){
         enemy.attribute.isAttacking = true
-        enemy.switchStance('attack')
+        if(enemy.attribute.direction == 'right'){
+            enemy.switchStance('attack')
+        }else enemy.switchStance('attackInvert')
+
     } else if (!enemy.input.attack){
         enemy.attribute.isAttacking = false
     }
-    if(enemy.image == enemy.sprites.attack.image){
-        if(detectCollision(enemy,player) && enemy.currentFrames >= 3){
+    if(enemy.image == enemy.sprites.attack.image ||
+        enemy.image == enemy.sprites.attackInvert.image){
+        if(detectCollision(enemy,player) && enemy.currentFrames >= 4){
             player.attribute.health -= enemy.attack.meleeDamage
         }
     }

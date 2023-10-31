@@ -138,6 +138,7 @@ const enemy = new Player({
     }
 })
     enemy.attribute.direction = 'left'
+    enemy.attack.meleeDamage *= 1.5
 
 
 
@@ -155,23 +156,25 @@ function clock(){
     drawEnvironment()
 
     // EXPERIMENTAL
-    player.drawBox()
-    enemy.drawBox()
-    player.drawAttack()
-    enemy.drawAttack()
+    // player.drawBox()
+    // enemy.drawBox()
+    // player.drawAttack()
+    // enemy.drawAttack()
     // 
 
     player.update()
     enemy.update()
 
+    playerAttack()
+    enemyAttack()
+
     // PLAYER INVERT TWEAK
     if(player.image == player.sprites.jumpInvert.image ||
-        player.image == player.sprites.fallInvert.image 
-    ){
+        player.image == player.sprites.fallInvert.image )
+    {
         player.offset.x = canvas.width *0.24
-    }else if(
-        player.image == player.sprites.attackInvert.image
-    ){
+    }else if(player.image == player.sprites.attackInvert.image)
+    {
         player.offset.x = canvas.width *0.35
     }else player.offset.x = canvas.width *0.27
 
@@ -179,15 +182,13 @@ function clock(){
     if(enemy.image == enemy.sprites.idleInvert.image || 
         enemy.image == enemy.sprites.runInvert.image ||
         enemy.image == enemy.sprites.jumpInvert.image ||
-        enemy.image == enemy.sprites.fallInvert.image
+        enemy.image == enemy.sprites.fallInvert.image 
     ){
         enemy.offset.x = canvas.width *0.258
+    }else if(enemy.image == enemy.sprites.attackInvert.image)
+    {
+        enemy.offset.x = canvas.width *0.53
     }else enemy.offset.x = canvas.width *0.3
-
-
-
-    playerAttack()
-    enemyAttack()
 
     // EXPERIMENTAL
     document.querySelector('#playerHealth').style.width = player.attribute.health + '%'

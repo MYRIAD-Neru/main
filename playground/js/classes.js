@@ -362,8 +362,8 @@ class Player extends Sprite{
         this.gravity()
         this.boundaries()
         this.movement()
-        this.draw()
         this.animateFrames()
+        this.draw()
     }
 }
 
