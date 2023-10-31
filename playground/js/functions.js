@@ -1,5 +1,6 @@
 console.log('Welcome to the Game.')
 
+// FORMALITIES
 const canvas = document.querySelector('canvas')
 const c = canvas.getContext('2d')
 
@@ -8,76 +9,102 @@ canvas.style.backgroundColor = 'none'
 document.body.style.userSelect = "auto";
 
 window.addEventListener("keydown", function(e) {
-    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+    if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight", "Shift"].indexOf(e.code) > -1) {
         e.preventDefault();
     }
 }, false);
+addEventListener('contextmenu', (e)=>{
+    e.preventDefault()
+})
 
-canvas.width = window.innerWidth * 0.9
+
+// CANVAS DIMENSIONS
+canvas.width = 3000
 canvas.height = canvas.width * 0.6
 
+// BORDERS
 const border = {
     top: 0,
-    bottom: canvas.height * 0.96,
+    bottom: canvas.height * 0.93,
     left: 0,
     right: canvas.width
 }
 
+function drawEnvironment(){
+    c.fillStyle = 'black'
+    c.fillRect(
+        0, 
+        border.bottom, 
+        canvas.width, 
+        300
+    )
+}
+
+// SPEED CONSTANTS
 const gravity = canvas.height * 0.0011
+const speed = canvas.width * 0.01
+const jump = -canvas.height * 0.027
 
-console.log(canvas.height, canvas.width)
-
-
-
-
+// INPUT REGISTER
 addEventListener('keydown', ({key}) => {
+    
+
     switch (key) {
     // PLAYER CONTROLS
         // LEFT 
         case 'a':
-            keys.left.pressed = true
+            player.input.left = true
             player.attribute.direction = 'left'
             break;
         // RIGHT 
         case 'd':
-            keys.right.pressed = true
+            player.input.right = true
             player.attribute.direction = 'right'
             break;
         // UP
         case 'w':
-            keys.up.pressed = true
+            player.input.up = true
             break;
         // DOWN
         case 's':
-            keys.down.pressed = true
+            player.input.down = true
             break;
+        // ATTACK
+        case 'j':
+            player.input.attack = true
+            break;
+        // BLOCK
+        case 'k':
+            player.input.block = true
+            break;
+        
     
     // ENEMY CONTROLS
         // ENEMY LEFT 
         case 'ArrowLeft':
-            keys.leftArrow.pressed = true
+            enemy.input.left = true
             enemy.attribute.direction = 'left'
             break;
         // ENEMY RIGHT 
         case 'ArrowRight':
-            keys.rightArrow.pressed = true
+            enemy.input.right = true
             enemy.attribute.direction = 'right'
             break;
         // ENEMY UP
         case 'ArrowUp':
-            keys.upArrow.pressed = true
+            enemy.input.up = true            
             break;
         // ENEMY DOWN
         case 'ArrowDown':
-            keys.downArrow.pressed = true
+            enemy.input.down = true            
             break;
         // ENEMY ATTACK
         case '1':
-            keys.one.pressed = true
+            enemy.input.attack = true              
             break;
         // ENEMY BLOCK
         case '2':
-            keys.two.pressed = true
+            enemy.input.block = true              
             break;
         }
     }
@@ -85,202 +112,137 @@ addEventListener('keydown', ({key}) => {
 
 addEventListener('keyup', ({key}) => {
     switch (key) {
-    // PLAYER CONTROLS
-        // LEFT 
-        case 'a':
-            keys.left.pressed = false
-            if (keys.right.pressed){
-                player.attribute.direction = 'right'
+        // PLAYER CONTROLS DONE
+            // LEFT 
+            case 'a':
+                player.input.left = false
+                if (player.input.right){
+                    player.attribute.direction = 'right'
+                }
+                break;
+            // RIGHT 
+            case 'd':
+                player.input.right = false
+                if (player.input.left){
+                    player.attribute.direction = 'left'
+                }
+                break;
+            // UP
+            case 'w':
+                player.input.up = false
+                break;
+            // DOWN
+            case 's':
+                player.input.down = false
+                break;
+            // ATTACK
+            case 'j':
+                player.input.attack = false
+                break;
+            // BLOCK
+            case 'k':
+                player.input.block = false
+                break;
+            
+        // ENEMY CONTROLS DONE
+            // ENEMY LEFT 
+            case 'ArrowLeft':
+                enemy.input.left = false
+                if (enemy.input.right){
+                    enemy.attribute.direction = 'right'
+                }
+                break;
+            // ENEMY RIGHT 
+            case 'ArrowRight':
+                enemy.input.right = false
+                if (enemy.input.left){
+                    enemy.attribute.direction = 'left'
+                }
+                break;
+            // ENEMY UP
+            case 'ArrowUp':
+                enemy.input.up = false            
+                break;
+            // ENEMY DOWN
+            case 'ArrowDown':
+                enemy.input.down = false            
+                break;
+            // ENEMY ATTACK
+            case '1':
+                enemy.input.attack = false              
+                break;
+            // ENEMY BLOCK
+            case '2':
+                enemy.input.block = false              
+                break;
             }
-            break;
-        // RIGHT 
-        case 'd':
-            keys.right.pressed = false
-            if (keys.left.pressed){
-                player.attribute.direction = 'left'
-            }
-            break;
-        // UP
-        case 'w':
-            keys.up.pressed = false
-            break;
-        // DOWN
-        case 's':
-            keys.down.pressed = false
-            break;
-
-    // ENEMY CONTROLS
-        // ENEMY LEFT 
-        case 'ArrowLeft':
-            keys.leftArrow.pressed = false
-            if (keys.rightArrow.pressed){
-                enemy.attribute.direction = 'right'
-            }
-            break;
-        // ENEMY RIGHT 
-        case 'ArrowRight':
-            keys.rightArrow.pressed = false
-            if (keys.leftArrow.pressed){
-                enemy.attribute.direction = 'left'
-            }
-            break;
-        // ENEMY UP
-        case 'ArrowUp':
-            keys.upArrow.pressed = false
-            break;
-        // ENEMY DOWN
-        case 'ArrowDown':
-            keys.downArrow.pressed = false
-            break;
-        case '1':
-            keys.one.pressed = false
-            break;
-        // ENEMY BLOCK
-        case '2':
-            keys.two.pressed = false
-            break;
         }
-    }
 )
 
+
 function detectCollision(boxOne, boxTwo){
+    const minRangeRight = boxOne.corePosition.x + boxOne.attack.meleeRange.min
+    const maxRangeRight = boxOne.corePosition.x + boxOne.attack.meleeRange.max + boxOne.attack.meleeRange.min
+    const minRangeLeft = boxOne.corePosition.x - boxOne.attack.meleeRange.min
+    const maxRangeLeft = boxOne.corePosition.x - boxOne.attack.meleeRange.max - boxOne.attack.meleeRange.min
+    const upRange = boxOne.corePosition.y - boxOne.attack.meleeRange.up
+    const downRange = boxOne.corePosition.y - boxOne.attack.meleeRange.up + boxOne.attack.meleeRange.down
     return(
-        (boxOne.attribute.direction == 'right'
-        && boxOne.corePosition.x + boxOne.attack.meleeRange >= boxTwo.position.x 
-        && boxOne.corePosition.x < boxTwo.corePosition.x 
-        && boxOne.corePosition.y < boxTwo.position.y + boxTwo.height 
-        && boxOne.corePosition.y > boxTwo.position.y) ^ 
+        (boxOne.attribute.direction == 'right'                  // DETECTION -> RIGHT
+        && maxRangeRight >= boxTwo.position.x 
+        && minRangeRight < boxTwo.position.x + boxTwo.width) 
+        ^
         (boxOne.attribute.direction == 'left'       
-        && boxOne.corePosition.x - boxOne.attack.meleeRange <= boxTwo.position.x + boxTwo.width 
-        && boxOne.corePosition.x > boxTwo.corePosition.x 
-        && boxOne.corePosition.y < boxTwo.position.y + boxTwo.height 
-        && boxOne.corePosition.y > boxTwo.position.y)
+        && maxRangeLeft <= boxTwo.position.x + boxTwo.width     // DETECTION -> LEFT
+        && minRangeLeft > boxTwo.position.x) 
+        &&
+        (upRange < boxTwo.position.y + boxTwo.height            // DETECTION -> HEIGHT
+        && downRange > boxTwo.position.y)
     )
 }
 
-function detectMovement(target){
-    target.position.x += target.velocity.x
-
-    if (target == player){
-        // LEFT & RIGHT
-        if(keys.right.pressed && target.attribute.direction == 'right'){
-            if (target.attribute.isFalling == true){
-                target.velocity.x = canvas.width * 0.006
-            }else{
-                target.velocity.x = canvas.width * 0.008
-            }
-        }else if(keys.left.pressed && target.attribute.direction == 'left') {
-            if (target.attribute.isFalling == true){
-                target.velocity.x = -canvas.width * 0.006
-            }else{
-                target.velocity.x = -canvas.width * 0.008
-            }
-        }else target.velocity.x = 0;
-
-        // UP & DOWN
-        if (keys.up.pressed && target.attribute.isFalling == false) {
-            if (target.attribute.isMoving){
-                target.velocity.y = -canvas.height * 0.03
-            }else{
-                target.velocity.y = -canvas.height * 0.027
-            }
-        }
-        if (keys.down.pressed && target.position.y + target.height < border.bottom && target.attribute.isFalling == false){
-            target.velocity.y += 1
-        }
-    }
-    else if (target == enemy){
-        // LEFT & RIGHT
-        if(keys.rightArrow.pressed && target.attribute.direction == 'right'){
-            if (target.attribute.isFalling == true){
-                target.velocity.x = canvas.width * 0.006
-            }else{
-                target.velocity.x = canvas.width * 0.008
-            }
-        }else if(keys.leftArrow.pressed && target.attribute.direction == 'left') {
-            if (target.attribute.isFalling == true){
-                target.velocity.x = -canvas.width * 0.006
-            }else{
-                target.velocity.x = -canvas.width * 0.008
-            }
-        }else target.velocity.x = 0;
-        // UP & DOWN
-        if (keys.upArrow.pressed && target.attribute.isFalling == false) {
-            if (target.attribute.isMoving){
-                target.velocity.y = -canvas.height * 0.03
-            }else{
-                target.velocity.y = -canvas.height * 0.027
-            }
-        }
-        if (keys.downArrow.pressed && target.position.y + target.height < border.bottom && target.attribute.isFalling == false){
-            target.velocity.y += 1
-        }
-    }
-}
-
 function playerAttack(){
-    // LEFT CLICK -> ATTACK
-    if (keys.leftClick.pressed){
-        keys.leftClick.pressed = false
+    // J -> ATTACK
+    if (player.input.attack && !player.attribute.isAttacking ){
         player.attribute.isAttacking = true
-     }else player.attribute.isAttacking = false
-    
-    if(detectCollision(player,enemy)){
-        player.attack.inRange = true
-    }else player.attack.inRange = false
+        if(player.attribute.direction == 'right'){
+            player.switchStance('attack')
+        }else player.switchStance('attackInvert')
 
-    // PLAYER ATTACK HITS
-    if(player.attribute.isAttacking && player.attack.inRange){
-        enemy.attribute.health -= player.attack.meleeDamage
-
+    } else if (!player.input.attack){
+        player.attribute.isAttacking = false
     }
-
-    // RIGHT CLICK -> BLOCK
-    if (keys.rightClick.pressed){
+    if(player.image == player.sprites.attack.image ||
+        player.image == player.sprites.attackInvert.image 
+    ){
+        if(detectCollision(player,enemy) && player.currentFrames >= 4){
+            player.attack.inRange = true
+            enemy.attribute.health -= player.attack.meleeDamage
+        }
+    }
+    // K -> BLOCK
+    if (player.input.block){
         player.attribute.isBlocking = true
     } else player.attribute.isBlocking = false
 }
 
 function enemyAttack(){
     // ONE -> ATTACK
-    if (keys.one.pressed){
-        keys.one.pressed = false
+    if (enemy.input.attack && !enemy.attribute.isAttacking ){
         enemy.attribute.isAttacking = true
-    }else enemy.attribute.isAttacking = false
-    
-    if(detectCollision(enemy,player)){
-        enemy.attack.inRange = true
-    }else enemy.attack.inRange = false
-
-    // ENEMY ATTACK HITS
-    if(enemy.attribute.isAttacking && enemy.attack.inRange){
-        player.attribute.health -= enemy.attack.meleeDamage
-        
+        enemy.switchStance('attack')
+    } else if (!enemy.input.attack){
+        enemy.attribute.isAttacking = false
     }
-
+    if(enemy.image == enemy.sprites.attack.image){
+        if(detectCollision(enemy,player) && enemy.currentFrames >= 3){
+            player.attribute.health -= enemy.attack.meleeDamage
+        }
+    }
     // TWO -> BLOCK
-    if (keys.rightClick.pressed){
+    if (enemy.input.block){
         enemy.attribute.isBlocking = true
     } else enemy.attribute.isBlocking = false
-
 }
 
 // PROJECTILE REGISTER
-addEventListener('contextmenu', (e)=>{
-    e.preventDefault()
-})
-addEventListener('mousedown', (e) => {
-    if (e.button == 0){
-        keys.leftClick.pressed = true
-    }else if(e.button == 2){
-        keys.rightClick.pressed = true
-    }
-    // clickCoordinates(e.offsetX, e.offsetY)
-})
-addEventListener('mouseup', (e) => {
-    if (e.button == 0){
-        keys.leftClick.pressed = false 
-    }else if(e.button == 2){
-        keys.rightClick.pressed = false
-    }
-})
